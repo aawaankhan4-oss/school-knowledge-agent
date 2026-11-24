@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Admin — School Info Assistant</title>
+<style>
+  :root {
+    --bg: #0b0d12;
+    --surface: #12151c;
+    --surface-2: #171b24;
+    --border: #262b38;
+    --text: #eef0f5;
+    --text-dim: #9aa3b6;
+    --text-faint: #626a7d;
+    --accent: #f4d319;
+    --accent-soft: rgba(244, 211, 25, 0.14);
+    --web: #4d55b8;
+    --web-soft: rgba(77, 85, 184, 0.18);
+    --good: #48d17a;
+    --good-soft: rgba(72, 209, 122, 0.14);
+    --bad: #e5534b;
+    --bad-soft: rgba(229, 83, 75, 0.14);
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 32px rgba(0, 0, 0, 0.35);
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--text); }
+  body {
+    font-family: ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif;
+    padding: 0 0 3rem;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    background: rgba(18, 21, 28, 0.7);
+  }
+  header h1 { font-size: 1.05rem; margin: 0; font-weight: 650; }
+  header nav { display: flex; gap: 0.6rem; }
+  header nav a {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    text-decoration: none;
+    padding: 0.4rem 0.8rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+  }
+  header nav a:hover { color: var(--text); border-color: var(--accent); }
+  @media (max-width: 560px) {
+    header { flex-wrap: wrap; gap: 0.5rem; }
+    header h1 { font-size: 0.9rem; }
+    header nav a { font-size: 0.72rem; padding: 0.3rem 0.55rem; }
+    main { padding: 1.25rem 1rem; }
+  }
+
+  main { max-width: 980px; margin: 0 auto; padding: 2rem 1.5rem; display: flex; flex-direction: column; gap: 2rem; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.1rem 1.25rem;
+    box-shadow: var(--shadow);
+  }
+  .card .label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-faint); margin-bottom: 0.4rem; }
+  .card .value { font-size: 1.6rem; font-weight: 700; }
+  .card .sub { font-size: 0.78rem; color: var(--text-dim); margin-top: 0.3rem; }
+
+  section h2 {
+    font-size: 0.95rem;
+    font-weight: 650;
+    margin: 0 0 0.9rem;
+    color: var(--accent);
+  }
+
+  .actions { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; }
+  button.action {
+    background: var(--accent);
+    color: #17120a;
+    border: none;
+    font-weight: 650;
+    font-size: 0.85rem;
+    padding: 0.6rem 1.1rem;
+    border-radius: 10px;
+    cursor: pointer;
+  }
+  button.action:hover { opacity: 0.9; }
+  button.action:disabled { opacity: 0.5; cursor: not-allowed; }
+  #actionStatus { font-size: 0.82rem; color: var(--text-dim); }
+
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    text-align: left;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-faint);
+    padding: 0.5rem 0.7rem;
+    border-bottom: 1px solid var(--border);
+  }
+  tbody td {
+    padding: 0.6rem 0.7rem;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.86rem;
+    vertical-align: top;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  .badge {
+    font-size: 0.68rem;
+    padding: 0.12rem 0.5rem;
+    border-radius: 6px;
+    background: var(--web-soft);
+    color: var(--web);
+    font-weight: 650;
+    white-space: nowrap;
+  }
+  .badge.bad { background: var(--bad-soft); color: var(--bad); }
+  .badge.doc { background: var(--accent-soft); color: var(--accent); }
+  .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
+  .table-wrap { overflow-x: auto; }
+  .empty { padding: 1.5rem; color: var(--text-faint); font-size: 0.85rem; }
+  .keyword-cloud { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .keyword-chip {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.4rem 0.85rem;
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .keyword-chip .count { color: var(--accent); font-weight: 700; }
+  .thumb { font-size: 0.85rem; }
+  .thumb.up { color: var(--good); }
+  .thumb.down { color: var(--bad); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Admin — School Info Assistant</h1>
+  <nav>
+    <a href="/">Back to chat</a>
+    <a href="/calendar">Calendar</a>
+    <a href="/logout">Log out</a>
+  </nav>
+</header>
+
+<main>
+
+  <section>
+    <h2>Knowledge base</h2>
+    <div class="grid">
+      {% for type_name, count in source_counts.items() %}
+      <div class="card">
+        <div class="label">{{ type_name }} sources</div>
+        <div class="value">{{ count }}</div>
+      </div>
+      {% endfor %}
+      <div class="card">
+        <div class="label">Total chunks</div>
+        <div class="value">{{ total_chunks }}</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>School calendar</h2>
+    <div class="grid">
+      <div class="card">
+        <div class="label">Events synced</div>
+        <div class="value">{{ calendar_event_count }}</div>
+      </div>
+      <div class="card">
+        <div class="label">Last synced</div>
+        <div class="value" style="font-size: 1rem;">{{ calendar_row[2] if calendar_row else "never" }}</div>
+        <div class="sub">{{ calendar_row[0] if calendar_row else "" }}</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Questions asked</h2>
+    <div class="grid">
+      <div class="card">
+        <div class="label">Answered questions</div>
+        <div class="value">{{ question_stats.total_questions }}</div>
+      </div>
+      <div class="card">
+        <div class="label">Answered from the web</div>
+        <div class="value">{{ question_stats.web_fallback_count }}</div>
+      </div>
+      <div class="card">
+        <div class="label">Blocked (off-topic/negative)</div>
+        <div class="value">{{ question_stats.blocked_count }}</div>
+      </div>
+      <div class="card">
+        <div class="label">Feedback</div>
+        <div class="value"><span class="thumb up">👍 {{ question_stats.thumbs_up }}</span> &nbsp; <span class="thumb down">👎 {{ question_stats.thumbs_down }}</span></div>
+      </div>
+      <div class="card">
+        <div class="label">Automatic retries after 👎</div>
+        <div class="value">{{ question_stats.retries }}</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Top topics</h2>
+    {% if keywords %}
+    <div class="keyword-cloud">
+      {% for word, count in keywords %}
+      <span class="keyword-chip">{{ word }} <span class="count">{{ count }}</span></span>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty">Not enough questions yet to show a pattern.</div>
+    {% endif %}
+  </section>
+
+  <section>
+    <h2>By user</h2>
+    <div class="table-wrap">
+      {% if per_user %}
+      <table>
+        <thead>
+          <tr><th>User</th><th>Questions</th><th>Blocked</th><th>Web</th><th>Feedback</th><th>Last asked</th></tr>
+        </thead>
+        <tbody>
+          {% for username, total, blocked_count, web_count, up, down, last_asked in per_user %}
+          <tr>
+            <td>{{ username }}</td>
+            <td>{{ total }}</td>
+            <td>{{ blocked_count }}</td>
+            <td>{{ web_count }}</td>
+            <td><span class="thumb up">👍{{ up }}</span> <span class="thumb down">👎{{ down }}</span></td>
+            <td>{{ last_asked }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty">No questions logged yet.</div>
+      {% endif %}
+    </div>
+  </section>
+
+  <section>
+    <h2>Actions</h2>
+    <div class="actions">
+      <button class="action" id="recrawlBtn">Re-crawl website now</button>
+      <button class="action" id="syncCalendarBtn">Re-sync calendar now</button>
+      <span id="actionStatus"></span>
+    </div>
+  </section>
+
+  <section>
+    <h2>Recent questions</h2>
+    <div class="table-wrap">
+      {% if recent %}
+      <table>
+        <thead>
+          <tr><th>Question</th><th>User</th><th>Source</th><th>Feedback</th><th>Asked</th></tr>
+        </thead>
+        <tbody>
+          {% for question, used_web, asked_at, is_blocked, block_reason, feedback, username, retried_from in recent %}
+          <tr>
+            <td>{{ question }}{% if retried_from %} <span class="badge">🔁 retry</span>{% endif %}</td>
+            <td>{{ username }}</td>
+            <td>
+              {% if is_blocked %}<span class="badge bad">blocked · {{ block_reason }}</span>
+              {% elif used_web %}<span class="badge">web</span>
+              {% else %}<span class="badge doc">document</span>{% endif %}
+            </td>
+            <td>
+              {% if feedback == "up" %}<span class="thumb up">👍</span>
+              {% elif feedback == "down" %}<span class="thumb down">👎</span>
+              {% else %}—{% endif %}
+            </td>
+            <td>{{ asked_at }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty">No questions logged yet.</div>
+      {% endif %}
+    </div>
+  </section>
+
+  <section>
+    <h2>Blocked questions</h2>
+    <div class="table-wrap">
+      {% if blocked %}
+      <table>
+        <thead>
+          <tr><th>Question</th><th>Reason</th><th>User</th><th>Asked</th></tr>
+        </thead>
+        <tbody>
+          {% for question, block_reason, asked_at, username in blocked %}
+          <tr>
+            <td>{{ question }}</td>
+            <td><span class="badge bad">{{ block_reason }}</span></td>
+            <td>{{ username }}</td>
+            <td>{{ asked_at }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty">Nothing's been blocked yet.</div>
+      {% endif %}
+    </div>
+  </section>
+
+</main>
+
+<script>
+  function wireAction(buttonId, url) {
+    const btn = document.getElementById(buttonId);
+    const status = document.getElementById("actionStatus");
+    btn.addEventListener("click", async () => {
+      btn.disabled = true;
+      status.textContent = "Working…";
+      try {
+        const res = await fetch(url, { method: "POST" });
+        const data = await res.json();
+        status.textContent = data.message || (res.ok ? "Done." : "Something went wrong.");
+      } catch (err) {
+        status.textContent = "Could not reach the server.";
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  }
+  wireAction("recrawlBtn", "/admin/recrawl");
+  wireAction("syncCalendarBtn", "/admin/sync-calendar");
+</script>
+
+</body>
+</html>
